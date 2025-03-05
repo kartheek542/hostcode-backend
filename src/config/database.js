@@ -10,4 +10,8 @@ const pool = new Pool({
     port: process.env.HOSTCODE_DB_PORT,
 });
 
+pool.on('error', (err) => {
+    console.log('Unexpected error on client', err);
+});
+
 export default { query: (text, params) => pool.query(text, params) };
