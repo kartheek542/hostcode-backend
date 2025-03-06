@@ -23,7 +23,6 @@ export const getProblemDetail = async (req, res) => {
 
 export const getSupportedLanguages = async (req, res) => {
     try {
-        console.log('getting languages');
         const supportedLanguagesResult = await db.query('select * from supported_language', []);
         return res.status(200).json({
             languages: supportedLanguagesResult.rows,
