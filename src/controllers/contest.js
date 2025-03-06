@@ -22,8 +22,9 @@ export const getContests = async (req, res) => {
             message: 'Successfully retrieved contests data',
         });
     } catch (e) {
-        console.log('Error occured while processing');
+        console.log('Error occured while fetching contests');
         console.log(e);
+        return res.status(500).json({ message: 'Error occurred while processing' });
     }
 };
 
@@ -48,8 +49,9 @@ export const getContestDetail = async (req, res) => {
         }
         return res.status(200).json({ contestDetails, message: 'Hello Hostcode' });
     } catch (e) {
-        console.log('Error occured while processing');
+        console.log('Error occured while fetching details of the contest');
         console.log(e);
+        return res.status(500).json({ message: 'Error occurred while processing' });
     }
 };
 
