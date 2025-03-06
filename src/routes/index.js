@@ -20,7 +20,7 @@ const registerRoutes = (router) => {
     router.get('/contests/:contestId/standings', contestController.getContestStandings);
     router.get('/problems', problemController.getAllProblems);
     router.get('/problems/:problemId', problemController.getProblemDetail);
-    router.get('/problems/languages', problemController.getSupportedLanguages);
+    router.get('/problems/language', problemController.getSupportedLanguages);
     router.post('/problems/submit', problemController.submitProblem);
 };
 export default registerRoutes;

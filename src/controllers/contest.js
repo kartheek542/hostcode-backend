@@ -47,7 +47,9 @@ export const getContestDetail = async (req, res) => {
             );
             contestDetails.problems = contestProblemsResult.rows;
         }
-        return res.status(200).json({ contestDetails, message: 'Hello Hostcode' });
+        return res
+            .status(200)
+            .json({ contestDetails, message: 'Successfully retieved contest details' });
     } catch (e) {
         console.log('Error occured while fetching details of the contest');
         console.log(e);
