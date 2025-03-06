@@ -29,7 +29,24 @@ export const getContests = async (req, res) => {
 
 export const getContestDetail = async (req, res) => {
     try {
-        return res.status(200).json({ message: 'Hello Hostcode' });
+        const { contestId } = req.params;
+        const contestQueryResult = await db.query('select * from contest where cid=$1', [
+            contestId,
+        ]);
+        if (contestQueryResult.rowCount === 0) {
+            return res.status(404).json({ message: 'Invalid contest id' });
+        }
+        const contestDetails = contestQueryResult.rows[0];
+        const contestStartTimestamp = new Date(contestDetails.start_time);
+        const currentTimestamp = new Date();
+        if (contestStartTimestamp <= currentTimestamp) {
+            const contestProblemsResult = await db.query(
+                'select pid as problemId, name as problemName from problem where contest_id=$1',
+                [contestId]
+            );
+            contestDetails.problems = contestProblemsResult.rows;
+        }
+        return res.status(200).json({ contestDetails, message: 'Hello Hostcode' });
     } catch (e) {
         console.log('Error occured while processing');
         console.log(e);
