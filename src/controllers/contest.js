@@ -1,5 +1,4 @@
 import db from '../config/database.js';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 
 export const getContests = async (req, res) => {
@@ -59,10 +58,26 @@ export const getContestDetail = async (req, res) => {
 
 export const getContestUserSubmissions = async (req, res) => {
     try {
-        return res.status(200).json({ message: 'Hello Hostcode' });
+        const { user_id } = req;
+        const { contestId } = req.params;
+        const contestResult = await db.query('select * from contest where cid = $1', [contestId]);
+        if (contestResult.rowCount === 0) {
+            return res.status(404).json({ message: 'Invalid contest id' });
+        }
+        const userContestSubmissionsResult = await db.query(
+            'select s.sid as submissionId, p.pid as problemId, p.name as problemName, sl.language, ss.label as submissionStatusLablel from contest c inner join problem p on p.contest_id = c.cid inner join submission s on p.pid = s.problem_id inner join submission_status ss on ss.status_id = s.submission_status_id inner join supported_language sl on s.language_id = sl.lid where c.cid = $1 and s.submitted_by = $2; ',
+            [contestId, user_id]
+        );
+        return res
+            .status(200)
+            .json({
+                submissions: userContestSubmissionsResult.rows,
+                message: 'Successfully retrieved user submissions of the contest',
+            });
     } catch (e) {
-        console.log('Error occured while processing');
+        console.log('Error occured while retrieving user submissions of the contest');
         console.log(e);
+        return res.status(500).json({ message: 'Error occurred while processing' });
     }
 };
 
