@@ -40,7 +40,7 @@ export const getContestDetail = async (req, res) => {
         const currentTimestamp = new Date();
         if (contestStartTimestamp <= currentTimestamp) {
             const contestProblemsResult = await db.query(
-                'select pid as problemId, name as problemName from problem where contest_id=$1',
+                'select pid as problem_id, name as problem_name from problem where contest_id=$1',
                 [contestId]
             );
             contestDetails.problems = contestProblemsResult.rows;
@@ -64,7 +64,7 @@ export const getContestUserSubmissions = async (req, res) => {
             return res.status(404).json({ message: 'Invalid contest id' });
         }
         const userContestSubmissionsResult = await db.query(
-            'select s.sid as submissionId, p.pid as problemId, p.name as problemName, sl.language, ss.label as submissionStatusLablel from contest c inner join problem p on p.contest_id = c.cid inner join submission s on p.pid = s.problem_id inner join submission_status ss on ss.status_id = s.submission_status_id inner join supported_language sl on s.language_id = sl.lid where c.cid = $1 and s.submitted_by = $2; ',
+            'select s.sid as submission_id, p.pid as problem_id, p.name as problem_name, sl.language, ss.label as submission_status_lablel from contest c inner join problem p on p.contest_id = c.cid inner join submission s on p.pid = s.problem_id inner join submission_status ss on ss.status_id = s.submission_status_id inner join supported_language sl on s.language_id = sl.lid where c.cid = $1 and s.submitted_by = $2; ',
             [contestId, user_id]
         );
         return res.status(200).json({

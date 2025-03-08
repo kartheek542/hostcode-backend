@@ -25,7 +25,7 @@ const registerRoutes = (router) => {
     router.get('/contests/:contestId/standings', contestController.getContestStandings);
     router.get('/problems', problemController.getAllProblems);
     router.get('/problems/languages', problemController.getSupportedLanguages);
-    router.post('/problems/submit', problemController.submitProblem);
+    router.post('/problems/submit', authenticate, problemController.submitProblem);
     router.get('/problems/:problemId', problemController.getProblemDetail);
 };
 export default registerRoutes;
