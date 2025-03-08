@@ -1,6 +1,4 @@
 import db from '../config/database.js';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 
 export const getAllProblems = async (req, res) => {
     try {
@@ -14,10 +12,25 @@ export const getAllProblems = async (req, res) => {
 
 export const getProblemDetail = async (req, res) => {
     try {
-        return res.status(200).json({ message: 'Hello Hostcode' });
+        const { problemId } = req.params;
+        const validateContestResult = await db.query(
+            'select c.start_time from problem p inner join contest c on p.contest_id = c.cid where p.pid = $1',
+            [problemId]
+        );
+        if (validateContestResult.rowCount === 0) {
+            return res.status(404).json({ message: 'Invalid problem id' });
+        }
+        const currentTimestamp = new Date();
+        const contestStartTimestamp = new Date(validateContestResult.rows[0].start_time);
+        if (currentTimestamp < contestStartTimestamp) {
+            return res.status(403).json({ message: "Contest hasn't started yet" });
+        }
+        const problemResult = await db.query('select * from problem where pid = $1', [problemId]);
+        return res.status(200).json({ problem: problemResult.rows[0], message: 'Hello Hostcode' });
     } catch (e) {
-        console.log('Error occured while processing');
+        console.log('Error occured while retrieving problem detail');
         console.log(e);
+        return res.status(500).json({ message: 'Error occurred while processing' });
     }
 };
 
