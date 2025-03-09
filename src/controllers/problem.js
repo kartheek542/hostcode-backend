@@ -1,5 +1,5 @@
 import db from '../config/database.js';
-import { uploadCodeToS3 } from '../utils/aws.js';
+import { sendMessageToSQS, uploadCodeToS3 } from '../utils/aws.js';
 
 export const getAllProblems = async (req, res) => {
     try {
@@ -80,6 +80,7 @@ export const submitProblem = async (req, res) => {
         // upload the code to s3
         await uploadCodeToS3(submissionId, problemId, languageId, code);
         // queue the submission in sqs
+        await sendMessageToSQS(submissionId, problemId, languageId);
         return res.status(200).json({ message: 'You have successfully submitted your code.' });
     } catch (e) {
         const { constraint } = e;
