@@ -1,4 +1,5 @@
 import db from '../config/database.js';
+import { createContestStandingsView } from '../utils/contest.js';
 
 export const getContests = async (req, res) => {
     try {
@@ -80,9 +81,72 @@ export const getContestUserSubmissions = async (req, res) => {
 
 export const getContestStandings = async (req, res) => {
     try {
-        return res.status(200).json({ message: 'Hello Hostcode' });
+        const { contestId } = req.params;
+        const { pageSize, pageNum } = req.query;
+        if (pageNum === null || pageNum === undefined) {
+            return res.status(400).json({ message: 'Please pass pageNum query parameter' });
+        }
+        if (pageSize === null || pageSize === undefined) {
+            return res.status(400).json({ message: 'Please pass pageSize query parameter' });
+        }
+        const totalRecordsResult = await db.query(
+            `select count(*) as total_records from contest_${contestId}_standings`
+        );
+        const standingsResult = await db.query(
+            `select * from contest_${contestId}_standings offset $1 limit $2`,
+            [(pageNum - 1) * pageSize, pageSize]
+        );
+        return res
+            .status(200)
+            .json({
+                totalRecords: totalRecordsResult.rows[0].total_records,
+                standings: standingsResult.rows,
+                message: 'Successhully retrieved standings of the contest',
+            });
     } catch (e) {
-        console.log('Error occured while processing');
+        console.log('Error occured while retrieving standing of the contest');
         console.log(e);
+        return res.status(500).json({ message: 'Error occurred while processing' });
+    }
+};
+
+export const registerUserContest = async (req, res) => {
+    try {
+        const { contestId } = req.params;
+        const { user_id } = req;
+        const validateContest = await db.query('select * from contest where cid=$1', [contestId]);
+        if (validateContest.rowCount === 0) {
+            return res.status(404).send({ message: 'Invalid contest_id' });
+        }
+        const contest = validateContest.rows[0];
+        const startTime = new Date(contest.start_time);
+        const now = new Date();
+        if (startTime <= now) {
+            return res
+                .status(400)
+                .send({ message: 'Could not register as contest is running or completed' });
+        } else {
+            const alreadyRegisteredContestResult = await db.query(
+                'select * from contest_registration where contest_id = $1 and user_id = $2',
+                [contestId, user_id]
+            );
+            if (alreadyRegisteredContestResult.rowCount === 0) {
+                await db.query(
+                    'insert into contest_registration(user_id, contest_id) values($1, $2)',
+                    [user_id, contestId]
+                );
+                return res
+                    .status(200)
+                    .send({ message: 'Registered Successfully' });
+            } else {
+                return res
+                    .status(400)
+                    .send({ message: 'Could not register as user is already registered' });
+            }
+        }
+    } catch (e) {
+        console.log('Error occured while registering user for the contest');
+        console.log(e);
+        return res.status(500).json({ message: 'Error occurred while processing' });
     }
 };

@@ -22,6 +22,7 @@ const registerRoutes = (router) => {
         authenticate,
         contestController.getContestUserSubmissions
     );
+    router.post('/contests/:contestId/register', authenticate, contestController.registerUserContest);
     router.get('/contests/:contestId/standings', contestController.getContestStandings);
     router.get('/problems', problemController.getAllProblems);
     router.get('/problems/languages', problemController.getSupportedLanguages);
