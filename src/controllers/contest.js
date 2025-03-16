@@ -93,7 +93,7 @@ export const getContestStandings = async (req, res) => {
             `select count(*) as total_records from contest_${contestId}_standings`
         );
         const standingsResult = await db.query(
-            `select * from contest_${contestId}_standings offset $1 limit $2`,
+            `select * from contest_${contestId}_standings order by total_score desc, user_id offset $1 limit $2`,
             [(pageNum - 1) * pageSize, pageSize]
         );
         return res
