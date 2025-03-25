@@ -11,7 +11,7 @@ export const getAllProblems = async (req, res) => {
             return res.status(400).json({message: "Please pass pageSize query parameter"})
         }
         const totalPagesResult = await db.query("select count(*) as total_records from problem p inner join contest c on c.cid = p.contest_id where c.end_time < NOW()")
-        const problemsResult = await db.query('select p.pid as problemId, p.name as problemName from problem p inner join contest c on c.cid = p.contest_id where c.end_time <= NOW() offset $1 limit $2', [(pageNum - 1) * pageSize, pageSize]);
+        const problemsResult = await db.query('select p.pid as problem_id, p.name as problem_name, p.score as problem_score from problem p inner join contest c on c.cid = p.contest_id where c.end_time <= NOW() offset $1 limit $2', [(pageNum - 1) * pageSize, pageSize]);
         console.log("Completed querying")
         console.log(totalPagesResult.rows);
         console.log(problemsResult.rows);
