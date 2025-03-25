@@ -18,7 +18,7 @@ export const getAllProblems = async (req, res) => {
         return res
             .status(200)
             .json({
-                totalRecords: totalPagesResult.rows[0].total_records,
+                totalRecords: parseInt(totalPagesResult.rows[0].total_records),
                 problems: problemsResult.rows,
                 message: "Successfully retrieved problems"
             });
