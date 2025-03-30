@@ -1,7 +1,7 @@
 import * as userController from '../controllers/user.js';
 import * as problemController from '../controllers/problem.js';
 import * as contestController from '../controllers/contest.js';
-import * as submissionController from "../controllers/submission.js";
+import * as submissionController from '../controllers/submission.js';
 import { authenticate, authenticateAdmin } from '../middleware/auth.js';
 
 const registerRoutes = (router) => {
@@ -23,13 +23,22 @@ const registerRoutes = (router) => {
         authenticate,
         contestController.getContestUserSubmissions
     );
-    router.post('/contests/:contestId/register', authenticate, contestController.registerUserContest);
+    router.post(
+        '/contests/:contestId/register',
+        authenticate,
+        contestController.registerUserContest
+    );
     router.get('/contests/:contestId/standings', contestController.getContestStandings);
     router.get('/problems', problemController.getAllProblems);
     router.get('/problems/languages', problemController.getSupportedLanguages);
     router.post('/problems/submit', authenticate, problemController.submitProblem);
     router.get('/problems/:problemId', problemController.getProblemDetail);
 
-    router.patch('/submission/:submissionId', authenticateAdmin, submissionController.updateSubmissionResult)
+    router.patch(
+        '/submission/:submissionId',
+        authenticateAdmin,
+        submissionController.updateSubmissionResult
+    );
+    router.get('/submission/:submissionId', authenticate, submissionController.getSubmissionDetail);
 };
 export default registerRoutes;

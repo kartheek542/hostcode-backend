@@ -34,8 +34,10 @@ export const authenticateAdmin = (req, res, next) => {
             if (err) {
                 return res.status(401).json({ message: 'Invalid token' });
             }
-            if(user.username !== "hostcode_admin") {
-                return res.status(401).json({ message: 'You are not authorized to perform this action' });
+            if (user.username !== 'hostcode_admin') {
+                return res
+                    .status(401)
+                    .json({ message: 'You are not authorized to perform this action' });
             }
             req.username = user.username;
             req.user_id = user.user_id;

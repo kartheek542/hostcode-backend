@@ -96,13 +96,11 @@ export const getContestStandings = async (req, res) => {
             `select * from contest_${contestId}_standings order by total_score desc, user_id offset $1 limit $2`,
             [(pageNum - 1) * pageSize, pageSize]
         );
-        return res
-            .status(200)
-            .json({
-                totalRecords: totalRecordsResult.rows[0].total_records,
-                standings: standingsResult.rows,
-                message: 'Successhully retrieved standings of the contest',
-            });
+        return res.status(200).json({
+            totalRecords: totalRecordsResult.rows[0].total_records,
+            standings: standingsResult.rows,
+            message: 'Successhully retrieved standings of the contest',
+        });
     } catch (e) {
         console.log('Error occured while retrieving standing of the contest');
         console.log(e);
@@ -135,9 +133,7 @@ export const registerUserContest = async (req, res) => {
                     'insert into contest_registration(user_id, contest_id) values($1, $2)',
                     [user_id, contestId]
                 );
-                return res
-                    .status(200)
-                    .send({ message: 'Registered Successfully' });
+                return res.status(200).send({ message: 'Registered Successfully' });
             } else {
                 return res
                     .status(400)

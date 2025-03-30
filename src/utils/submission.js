@@ -33,19 +33,19 @@ export const calculateFinalTestResult = (tests) => {
 };
 
 export const getSubmissionStatusId = (status) => {
-    if(status === 'AC') {
+    if (status === 'AC') {
         return 2;
     }
-    if(status === 'WA') {
+    if (status === 'WA') {
         return 1;
     }
-    if(status === 'TLE') {
+    if (status === 'TLE') {
         return 1;
     }
-    if(status === 'RE') {
+    if (status === 'RE') {
         return 1;
     }
-    if(status === 'CE') {
+    if (status === 'CE') {
         return 1;
     }
-}
+};

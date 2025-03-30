@@ -3,25 +3,28 @@ import { sendMessageToSQS, uploadCodeToS3 } from '../utils/aws.js';
 
 export const getAllProblems = async (req, res) => {
     try {
-        const {pageNum, pageSize} = req.query;
-        if(pageNum === null || pageNum === undefined) {
-            return res.status(400).json({message: "Please pass pageNum query parameter"})
+        const { pageNum, pageSize } = req.query;
+        if (pageNum === null || pageNum === undefined) {
+            return res.status(400).json({ message: 'Please pass pageNum query parameter' });
         }
-        if(pageSize === null || pageSize === undefined) {
-            return res.status(400).json({message: "Please pass pageSize query parameter"})
+        if (pageSize === null || pageSize === undefined) {
+            return res.status(400).json({ message: 'Please pass pageSize query parameter' });
         }
-        const totalPagesResult = await db.query("select count(*) as total_records from problem p inner join contest c on c.cid = p.contest_id where c.end_time < NOW()")
-        const problemsResult = await db.query('select p.pid as problem_id, p.name as problem_name, p.score as problem_score from problem p inner join contest c on c.cid = p.contest_id where c.end_time <= NOW() offset $1 limit $2', [(pageNum - 1) * pageSize, pageSize]);
-        console.log("Completed querying")
+        const totalPagesResult = await db.query(
+            'select count(*) as total_records from problem p inner join contest c on c.cid = p.contest_id where c.end_time < NOW()'
+        );
+        const problemsResult = await db.query(
+            'select p.pid as problem_id, p.name as problem_name, p.score as problem_score from problem p inner join contest c on c.cid = p.contest_id where c.end_time <= NOW() offset $1 limit $2',
+            [(pageNum - 1) * pageSize, pageSize]
+        );
+        console.log('Completed querying');
         console.log(totalPagesResult.rows);
         console.log(problemsResult.rows);
-        return res
-            .status(200)
-            .json({
-                totalRecords: parseInt(totalPagesResult.rows[0].total_records),
-                problems: problemsResult.rows,
-                message: "Successfully retrieved problems"
-            });
+        return res.status(200).json({
+            totalRecords: parseInt(totalPagesResult.rows[0].total_records),
+            problems: problemsResult.rows,
+            message: 'Successfully retrieved problems',
+        });
     } catch (e) {
         console.log('Error occured while retrieving all problems');
         console.log(e);
@@ -76,7 +79,7 @@ export const submitProblem = async (req, res) => {
             [problemId, languageId, user_id, code]
         );
         const submissionId = insertSubmission.rows[0].sid;
-        console.log("Submission id is", submissionId);
+        console.log('Submission id is', submissionId);
         // upload the code to s3
         await uploadCodeToS3(submissionId, problemId, languageId, code);
         // queue the submission in sqs
@@ -84,12 +87,20 @@ export const submitProblem = async (req, res) => {
         return res.status(200).json({ message: 'You have successfully submitted your code.' });
     } catch (e) {
         const { constraint } = e;
-        if (constraint !== null && constraint !== undefined && constraint === 'submission_problem_id_fkey') {
+        if (
+            constraint !== null &&
+            constraint !== undefined &&
+            constraint === 'submission_problem_id_fkey'
+        ) {
             return res.status(404).json({
                 message: 'Invalid problemId',
             });
         }
-        if (constraint !== null && constraint !== undefined && constraint === 'submission_language_id_fkey') {
+        if (
+            constraint !== null &&
+            constraint !== undefined &&
+            constraint === 'submission_language_id_fkey'
+        ) {
             return res.status(404).json({
                 message: 'Invalid languageId',
             });
