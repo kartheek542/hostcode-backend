@@ -150,17 +150,17 @@ export const registerUserContest = async (req, res) => {
 export const createNewContest = async (req, res) => {
     try {
         const { contestName, contestDescription, startTime, endTime } = req.body;
-        console.log("values")
-        console.log(contestName)
-        console.log(contestDescription)
-        console.log(startTime)
-        console.log(endTime)
+        console.log('values');
+        console.log(contestName);
+        console.log(contestDescription);
+        console.log(startTime);
+        console.log(endTime);
         const insertContest = await db.query(
             'insert into contest(name, description, start_time, end_time) values ($1, $2,$3,$4) returning cid',
             [contestName, contestDescription, startTime, endTime]
         );
-        console.log("new contest id is", insertContest.rows[0].cid);
-        console.log("Creating standings view");
+        console.log('new contest id is', insertContest.rows[0].cid);
+        console.log('Creating standings view');
         await createContestStandingsView(insertContest.rows[0].cid);
         return res.status(200).send({ message: 'Contest created successfully' });
     } catch (e) {

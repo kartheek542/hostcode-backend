@@ -86,7 +86,10 @@ export const submitProblem = async (req, res) => {
         const contestEndTime = new Date(isContestRunning.rows[0].end_time);
         const now = new Date();
         if (contestStartTime <= now && now <= contestEndTime) {
-            const isRegisteredUser = await db.query('select * from contest_registration where user_id = $1, contest_id = $2', [user_id, isContestRunning.rows[0].cid]);
+            const isRegisteredUser = await db.query(
+                'select * from contest_registration where user_id = $1, contest_id = $2',
+                [user_id, isContestRunning.rows[0].cid]
+            );
             if (isRegisteredUser.rowCount === 0) {
                 return res.status(403).json({
                     message: 'You need to registerd to the contest before submitting this problem',
