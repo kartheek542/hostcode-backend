@@ -74,6 +74,25 @@ export const submitProblem = async (req, res) => {
     try {
         const { user_id } = req;
         const { problemId, languageId, code } = req.body;
+        // submission validity
+        const isContestRunning = await db.query(
+            'select c.* from problem p inner join contest c on p.contest_id = c.cid where p.pid = $1',
+            [problemId]
+        );
+        if (isContestRunning.rowCount === 0) {
+            return res.status(404).json({ message: 'Invalid problemId' });
+        }
+        const contestStartTime = new Date(isContestRunning.rows[0].start_time);
+        const contestEndTime = new Date(isContestRunning.rows[0].end_time);
+        const now = new Date();
+        if (contestStartTime <= now && now <= contestEndTime) {
+            const isRegisteredUser = await db.query('select * from contest_registration where user_id = $1, contest_id = $2', [user_id, isContestRunning.rows[0].cid]);
+            if (isRegisteredUser.rowCount === 0) {
+                return res.status(403).json({
+                    message: 'You need to registerd to the contest before submitting this problem',
+                });
+            }
+        }
         const insertSubmission = await db.query(
             'insert into submission(problem_id, language_id, submission_status_id, submitted_by, code) values($1, $2, 1, $3, $4) returning sid',
             [problemId, languageId, user_id, code]

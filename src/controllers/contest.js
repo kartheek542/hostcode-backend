@@ -65,7 +65,7 @@ export const getContestUserSubmissions = async (req, res) => {
             return res.status(404).json({ message: 'Invalid contest id' });
         }
         const userContestSubmissionsResult = await db.query(
-            'select s.sid as submission_id, p.pid as problem_id, p.name as problem_name, sl.language, ss.label as submission_status_lablel from contest c inner join problem p on p.contest_id = c.cid inner join submission s on p.pid = s.problem_id inner join submission_status ss on ss.status_id = s.submission_status_id inner join supported_language sl on s.language_id = sl.lid where c.cid = $1 and s.submitted_by = $2; ',
+            'select s.sid as submission_id, p.pid as problem_id, p.name as problem_name, sl.language, ss.label as submission_status_label from contest c inner join problem p on p.contest_id = c.cid inner join submission s on p.pid = s.problem_id inner join submission_status ss on ss.status_id = s.submission_status_id inner join supported_language sl on s.language_id = sl.lid where c.cid = $1 and s.submitted_by = $2; ',
             [contestId, user_id]
         );
         return res.status(200).json({
@@ -144,5 +144,28 @@ export const registerUserContest = async (req, res) => {
         console.log('Error occured while registering user for the contest');
         console.log(e);
         return res.status(500).json({ message: 'Error occurred while processing' });
+    }
+};
+
+export const createNewContest = async (req, res) => {
+    try {
+        const { contestName, contestDescription, startTime, endTime } = req.body;
+        console.log("values")
+        console.log(contestName)
+        console.log(contestDescription)
+        console.log(startTime)
+        console.log(endTime)
+        const insertContest = await db.query(
+            'insert into contest(name, description, start_time, end_time) values ($1, $2,$3,$4) returning cid',
+            [contestName, contestDescription, startTime, endTime]
+        );
+        console.log("new contest id is", insertContest.rows[0].cid);
+        console.log("Creating standings view");
+        await createContestStandingsView(insertContest.rows[0].cid);
+        return res.status(200).send({ message: 'Contest created successfully' });
+    } catch (e) {
+        console.log('Error occured while creating a new contest');
+        console.log(e);
+        return res.status(500).json({ message: 'Error occured while creating a new contest' });
     }
 };

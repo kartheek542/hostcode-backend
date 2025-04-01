@@ -1,5 +1,7 @@
+import req from 'express/lib/request.js';
 import db from '../config/database.js';
 import { calculateFinalTestResult, getSubmissionStatusId } from '../utils/submission.js';
+import res from 'express/lib/response.js';
 
 export const updateSubmissionResult = async (req, res) => {
     try {
@@ -41,5 +43,23 @@ export const getSubmissionDetail = async (req, res) => {
         return res
             .status(500)
             .json({ message: 'Error occurred while retrieving submission details' });
+    }
+};
+
+export const getAllSubmissions = async (req, res) => {
+    try {
+        const { user_id } = req;
+        const userSubmissionsResult = await db.query(
+            'select s.sid as submission_id, p.pid as problem_id, p.name as problem_name, sl.language, ss.label as submission_status_label from contest c inner join problem p on p.contest_id = c.cid inner join submission s on p.pid = s.problem_id inner join submission_status ss on ss.status_id = s.submission_status_id inner join supported_language sl on s.language_id = sl.lid where s.submitted_by = $1; ',
+            [user_id]
+        );
+        return res.status(200).json({
+            submissions: userSubmissionsResult.rows,
+            message: 'Successfully retrieved user submissions of the contest',
+        });
+    } catch (e) {
+        console.log('Error occurred while retrieving all submissions');
+        console.log(e);
+        return res.status(500).json({ message: 'Error occurred while retrieving all submissions' });
     }
 };

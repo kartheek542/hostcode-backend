@@ -17,6 +17,7 @@ const registerRoutes = (router) => {
     router.post('/user/register', userController.registerUser);
     router.post('/user/login', userController.loginUser);
     router.get('/contests', contestController.getContests);
+    router.post('/contests', authenticateAdmin, contestController.createNewContest);
     router.get('/contests/:contestId', contestController.getContestDetail);
     router.get(
         '/contests/:contestId/mysubmissions',
@@ -40,5 +41,6 @@ const registerRoutes = (router) => {
         submissionController.updateSubmissionResult
     );
     router.get('/submission/:submissionId', authenticate, submissionController.getSubmissionDetail);
+    router.get('/submission', authenticate, submissionController.getAllSubmissions);
 };
 export default registerRoutes;
