@@ -24,7 +24,7 @@ export const getSubmissionDetail = async (req, res) => {
     try {
         const { submissionId } = req.params;
         const { user_id } = req;
-        const submission = await db.query('select * from submission where sid = $1', [
+        const submission = await db.query('select s.*, p.name as problem_name from submission s inner join problem p on s.problem_id = p.pid where sid = $1', [
             submissionId,
         ]);
         if (submission.rowCount === 0) {
