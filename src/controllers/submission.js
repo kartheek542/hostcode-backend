@@ -24,13 +24,14 @@ export const getSubmissionDetail = async (req, res) => {
     try {
         const { submissionId } = req.params;
         const { user_id } = req;
-        const submission = await db.query('select s.*, p.name as problem_name from submission s inner join problem p on s.problem_id = p.pid where sid = $1', [
-            submissionId,
-        ]);
+        const submission = await db.query(
+            'select s.sid, s.code, s.result, s.submitted_by as user_id, s.submitted_at, s.problem_id, p.name as problem_name, sl.language, u.username, ss.label as submission_status from submission s inner join problem p on s.problem_id = p.pid inner join supported_language sl on s.language_id = sl.lid inner join submission_status ss on s.submission_status_id = ss.status_id inner join users u on s.submitted_by = u.uid where sid = $1',
+            [submissionId]
+        );
         if (submission.rowCount === 0) {
             return res.status(404).json({ message: 'Invalid Submission id' });
         }
-        if (user_id !== submission.rows[0].submitted_by) {
+        if (user_id !== submission.rows[0].user_id) {
             return res.status(403).json({ message: 'You are forbidden to view this submission' });
         }
         return res.status(200).json({
